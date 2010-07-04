@@ -1,0 +1,12 @@
+-----------------------------------------
+ A simple scientific library for Haskell
+-----------------------------------------
+
+INSTALLATION
+
+See the INSTALL file.
+
+ACKNOWLEDGEMENTS -----------------------------------------------------
+
+I thank ALberto Ruiz for hmatrix, especially for setup files which I
+have shamelessly copied and modified

@@ -1,0 +1,36 @@
+0.1.0.1:	
+		first version
+
+0.1.0.2:
+		fixed configure.hs to work for local install
+		updated to reflect exportation of check from Data.Packed.Development
+		   in hmatrix-0.9.3.0
+
+0.1.0.3:		
+		added Numeric.GSL.Fitting.Linear
+		attempt to fix problem on hackage with configure (localBuild "dist")
+
+0.1.0.4:
+		fixed argument types in Numeric.GSL.Fitting.Linear
+		removed redundant imports
+		attempt to fix problem on hackage with configure (printCurrentDirectory)
+
+0.1.0.5:
+		added multifit to Numeric.GSL.Fitting.Linear
+		attempt to fix problem on hackage with configure (removed printCurrentDirectory)
+
+0.2.0.1:
+		moved GSL.* to hmatrix-gsl-stats
+		added Numeric.Statistics.Shannon
+
+0.2.0.3:
+		added mutual_information to Numeric.Statistics.Shannon
+
+0.2.0.4:
+		fixed definition of mutual_information
+
+0.2.0.5:
+		added Histogram
+
+0.2.0.6:
+		

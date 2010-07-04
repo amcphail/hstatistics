@@ -1,0 +1,44 @@
+Name:               hstatistics
+Version:            0.2.0.6
+License:            GPL
+License-file:       LICENSE
+Copyright:          (c) A.V.H. McPhail 2010
+Author:             Vivian McPhail
+Maintainer:         haskell.vivian.mcphail <at> gmail <dot> com
+Stability:          provisional
+Homepage:           http://code.haskell.org/hstatistics
+Synopsis:           Statistics
+Description:        Purely functional interface for statistics based on hmatrix and hmatrix-gsl-stats
+Category:           Math, Statistics
+tested-with:        GHC ==6.12.1
+
+cabal-version:      >=1.2
+
+build-type:         Simple
+
+extra-source-files: README INSTALL CHANGES
+extra-tmp-files:    hstatistics.buildinfo
+
+library
+
+    Build-Depends:      base >= 3 && < 5,
+                        hmatrix >= 0.10.0, hmatrix-gsl-stats >= 0.1.1.5
+
+    Extensions:         
+
+    hs-source-dirs:     lib
+    Exposed-modules:    Numeric.Statistics.Information
+                        Numeric.Statistics.Histogram
+    other-modules:      
+    C-sources:          
+
+    ghc-prof-options:   -auto
+
+    ghc-options:        -Wall -fno-warn-missing-signatures
+                              -fno-warn-orphans
+                              -fno-warn-unused-binds
+
+    source-repository head
+        type:     darcs
+        location: http://code.haskell.org/hstatistics
+

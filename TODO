@@ -1,0 +1,7 @@
+* change Histrogram2D getBins to take tuple
+* create histograms from standard distributions
+
+- change position of seed argument in random distribution calls to be last (for mapping)
+- storable pair (tuples)
+- epochs in multichannel?
+- Num and Linear instances for Float
