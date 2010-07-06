@@ -43,8 +43,6 @@ import Numeric.GSL.Statistics
 
 import Numeric.Statistics
 
-import Control.Monad(replicateM)
-
 import System.Random
 
 -----------------------------------------------------------------------------
@@ -133,19 +131,19 @@ random_vector s (r,c) = fromLists $ unconcat r c $ randomRs (-1,1) (mkStdGen s)
 update :: (Double -> Double) -> (Double -> Double) -> Matrix Double -> Matrix Double -> Matrix Double
 update g g' w x = let y = w <> x
                       ys = toRows y
-                      bis = map (\y' -> - mean (y' * (mapVector sigmoid y'))) ys
-                      ais = zipWith (\b y' -> -1 / (b - mean (mapVector sigmoid y'))) bis ys
+                      bis = map (\y' -> - mean (y' * (mapVector g y'))) ys
+                      ais = zipWith (\b y' -> -1 / (b - mean (mapVector g y'))) bis ys
                       r = rows y
                       ix = ((1,1),(r,r))
-                      cov = fromArray2D $ I.listArray ix $ map (\(m,n) -> covariance (mapVector sigmoid' (ys!!(m-1))) (ys!!(n-1))) $ I.range ix
+                      cov = fromArray2D $ I.listArray ix $ map (\(m,n) -> covariance (mapVector g' (ys!!(m-1))) (ys!!(n-1))) $ I.range ix
                   in w + (diag $ fromList ais) <> ((diag $ fromList bis) + cov) <> w  
 
 decorrelate :: Matrix Double -> Matrix Double
 decorrelate w = let w' = w / (scalar $ sqrt $ pnorm PNorm2 (w <> trans w))
-                in decorrelate w w'
-    where decorrelate w w' 
+                in decorrelate' w w'
+    where decorrelate' w w' 
               | converged 0.000001 w w' = w'
-              | otherwise               = decorrelate w' ((scale 1.5 w') - (scale 0.5 (w <> trans w <> w)))
+              | otherwise               = decorrelate' w' ((scale 1.5 w') - (scale 0.5 (w <> trans w <> w)))
 {- don't know how to do svd of non-square matrices
 decorrelate m = let (u,d,v) = svd m
                 in u <> (diag (d ** (-0.5))) <> trans v <> m
@@ -167,6 +165,7 @@ ica' :: (Double -> Double)          -- ^ transfer function (tanh,u exp(u^2/2), e
      -> Matrix Double               -- ^ weight matrix
      -> [Matrix Double]             -- ^ input data in chunks
      -> Matrix Double               -- ^ ica transform (weight matrix)
+ica' _ _  _ _ _ []     = error "no sample data"
 ica' g g' n t w (x:xs) = let w' = normalise n $ decorrelate $ update g g' w x
                              in if converged t w w' 
                                 then w'
@@ -182,7 +181,7 @@ ica :: Int                         -- ^ random seed
     -> I.Array Int (Vector Double) -- ^ data
     -> (I.Array Int (Vector Double),Matrix Double) -- ^ transformed data, ica transform
 ica r g g' n t o s a = let i = I.rangeSize $ I.bounds a
-                           w = random_vector s (o,i)
+                           w = random_vector r (o,i)
                            x' = fromRows $ I.elems a
                            -- next line is BAD if distribution not stationary
                            x = concat $ toBlocksEvery i s x'

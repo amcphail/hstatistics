@@ -35,3 +35,8 @@
 0.2.0.6:
 		added PCA
 		added ICA
+
+0.2.0.7
+		removed hard-coded sigmoid from ICA algorithm internals
+		was not using seed passed to ica
+		minor fixes to remove warnings
