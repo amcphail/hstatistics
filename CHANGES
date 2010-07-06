@@ -33,4 +33,5 @@
 		added Histogram
 
 0.2.0.6:
-		
+		added PCA
+		added ICA

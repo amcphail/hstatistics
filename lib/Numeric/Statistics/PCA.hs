@@ -9,12 +9,12 @@
 -- Stability   :  provisional
 -- Portability :  portable
 --
--- Principle Components Analysis
+-- Principal Components Analysis
 --
 -----------------------------------------------------------------------------
 
 module Numeric.Statistics.PCA (
-                               pca, pcaTransform
+                               pca, pcaTransform, pcaReduce
                           ) where
 
 
@@ -34,23 +34,17 @@ import Numeric.Statistics
 
 -----------------------------------------------------------------------------
 
-qcomp e1@(ev1,_) e2@(ev2,_) 
-    | ev1 < ev2             = True
-    | otherwise             = False
-
-qsort (x:xs) = [ y | y <- xs, qcomp y x ] ++ (x : [ y | y <- xs, qcomp x y ])
-
 -- | find the n principal components of multidimensional data
 pca :: I.Array Int (Vector Double)    -- the data
-    -> Int                            -- how many dimensions to keep
+    -> Double                         -- eigenvalue threshold
     -> Matrix Double
-pca d n = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from each dimension
+pca d q = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from each dimension
               cv = covarianceMatrix d'
               (val',vec') = eigSH cv           -- the covariance matrix is real symmetric
               val = toList val'
               vec = toColumns vec'
               v' = zip val vec
-              v = take n $ qsort v'
+              v = filter (\(x,_) -> x > q) v'  -- keep only eigens > than parameter
           in fromColumns $ snd $ unzip v
 
 -- | perform a PCA transform of the original data (remove mean)
@@ -59,7 +53,21 @@ pcaTransform :: I.Array Int (Vector Double)    -- ^ the data
              -> Matrix Double                  -- ^ the principal components
              -> I.Array Int (Vector Double)    -- ^ the transformed data
 pcaTransform d m = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from each dimension
-                       a = fromRows $ I.elems d'
-                   in I.listArray (1,cols m) $ toColumns $ (trans m) <> a
+                   in I.listArray (1,cols m) $ toRows $ (trans m) <> (fromRows $ I.elems d')
+
+-- | perform a dimension-reducing PCA modification
+pcaReduce :: I.Array Int (Vector Double)      -- ^ the data
+          -> Double                           -- ^ eigenvalue threshold
+          -> I.Array Int (Vector Double)      -- ^ the reduced data, with n principal components
+pcaReduce d q = let u = fmap (scalar . mean) d
+                    d' = zipWith (-) (I.elems d) (I.elems u)
+                    cv = covarianceMatrix $ I.listArray (I.bounds d) d'
+                    (val',vec') = eigSH cv           -- the covariance matrix is real symmetric
+                    val = toList val'
+                    vec = toColumns vec'
+                    v' = zip val vec
+                    v = filter (\(x,_) -> x > q) v'  -- keep only eigens > than parameter
+                    m = fromColumns $ snd $ unzip v
+                 in I.listArray (I.bounds d) $ zipWith (+) (toRows $ m <> (trans m) <> fromRows d') (I.elems u) 
 
 -----------------------------------------------------------------------------

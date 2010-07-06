@@ -22,12 +22,16 @@ extra-tmp-files:    hstatistics.buildinfo
 library
 
     Build-Depends:      base >= 3 && < 5,
+                        array, random,
                         hmatrix >= 0.10.0, hmatrix-gsl-stats >= 0.1.1.5
 
     Extensions:         
 
     hs-source-dirs:     lib
-    Exposed-modules:    Numeric.Statistics.Information
+    Exposed-modules:    Numeric.Statistics
+                        Numeric.Statistics.PCA
+                        Numeric.Statistics.ICA
+                        Numeric.Statistics.Information
                         Numeric.Statistics.Histogram
     other-modules:      
     C-sources:          
