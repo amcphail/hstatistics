@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.Histogram
--- Copyright   :  (c) Alexander Vivian Hugh McPhail 2010
+-- Copyright   :  (c) A. V. H. McPhail 2010
 -- License     :  GPL-style
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com

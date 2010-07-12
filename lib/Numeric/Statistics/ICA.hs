@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.ICA
--- Copyright   :  (c) Alexander Vivian Hugh McPhail 2010
+-- Copyright   :  (c) A. V. H. McPhail 2010
 -- License     :  GPL-style
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com
@@ -13,11 +13,11 @@
 --
 --  implements the FastICA algorithm found in:
 --
---   http://www.google.com/url?sa=t&source=web&cd=2&ved=0CBgQFjAB&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.79.7003%26rep%3Drep1%26type%3Dpdf&ei=RQozTJb6L4_fcbCV6cMD&usg=AFQjCNGClLIB9MAvbrEj45SyUx9cYubLyA&sig2=hg5Wnfy3dLPkoIc1hqSfjg
+-- * Aapo Hyvärinen and Erkki Oja,
+--   Independent Component Analysis: Algorithms and Applications,
+--   /Neural Networks/, 13(4-5):411-430, 2000
 --
---   Aapo Hyvärinen and Erkki Oja
---   Independent Component Analysis: Algorithms and Applications
---   Neural Networks, 13(4-5):411-430, 2000
+--   <http://www.google.com/url?sa=t&source=web&cd=2&ved=0CBgQFjAB&url=http%3A%2F%2Fciteseerx.ist.psu.edu%2Fviewdoc%2Fdownload%3Fdoi%3D10.1.1.79.7003%26rep%3Drep1%26type%3Dpdf&ei=RQozTJb6L4_fcbCV6cMD&usg=AFQjCNGClLIB9MAvbrEj45SyUx9cYubLyA&sig2=hg5Wnfy3dLPkoIc1hqSfjg>
 --
 -----------------------------------------------------------------------------
 
@@ -38,6 +38,7 @@ import Data.Packed.Matrix
 
 import Numeric.LinearAlgebra.Interface
 import Numeric.LinearAlgebra.Algorithms
+import Numeric.LinearAlgebra.Linear
 
 import Numeric.GSL.Statistics
 
@@ -139,14 +140,15 @@ update g g' w x = let y = w <> x
                   in w + (diag $ fromList ais) <> ((diag $ fromList bis) + cov) <> w  
 
 decorrelate :: Matrix Double -> Matrix Double
-decorrelate w = let w' = w / (scalar $ sqrt $ pnorm PNorm2 (w <> trans w))
-                in decorrelate' w w'
-    where decorrelate' w w' 
-              | converged 0.000001 w w' = w'
-              | otherwise               = decorrelate' w' ((scale 1.5 w') - (scale 0.5 (w <> trans w <> w)))
-{- don't know how to do svd of non-square matrices
-decorrelate m = let (u,d,v) = svd m
-                in u <> (diag (d ** (-0.5))) <> trans v <> m
+decorrelate m = let (d',v') = eig m
+                    d = fst $ fromComplex d'
+                    v = fst $ fromComplex v'
+                in v <> (diag (d ** (-0.5))) <> trans v <> m
+{-decorrelate n t w = let w' = w / (scalar $ sqrt $ pnorm n (w <> trans w))
+                    in decorrelate' t w w'
+    where decorrelate' t' m m' 
+              | converged t' m m' = m'
+              | otherwise         = decorrelate' t' m' ((scale 1.5 m') - (scale 0.5 (m' <> trans m' <> m')))
 -}
 
 normalise :: NormType -> Matrix Double -> Matrix Double
@@ -171,23 +173,24 @@ ica' g g' n t w (x:xs) = let w' = normalise n $ decorrelate $ update g g' w x
                                 then w'
                                 else ica' g g' n t w' (xs ++ [x])
 
+-- | perform an ICA transform
 ica :: Int                         -- ^ random seed
     -> (Double -> Double)          -- ^ transfer function (tanh,u exp(u^2/2), etc...)
     -> (Double -> Double)          -- ^ derivative of transfer function
     -> NormType                    -- ^ type of normalisation: Infinity, PNorm1, PNorm2
     -> Double                      -- ^ convergence tolerance for feature vectors
-    -> Int                         -- ^ output dimensions
+--    -> Int                         -- ^ output dimensions
     -> Int                         -- ^ sampling size (must be smaller than length of data)
     -> I.Array Int (Vector Double) -- ^ data
     -> (I.Array Int (Vector Double),Matrix Double) -- ^ transformed data, ica transform
-ica r g g' n t o s a = let i = I.rangeSize $ I.bounds a
-                           w = random_vector r (o,i)
-                           x' = fromRows $ I.elems a
-                           -- next line is BAD if distribution not stationary
-                           x = concat $ toBlocksEvery i s x'
-                           w' = ica' g g' n t w x
-                           y = w' <> x'
-                       in (I.listArray (1,o) $ toRows y,w') 
+ica r g g' n t s a = let i = I.rangeSize $ I.bounds a
+                         w = random_vector r (i,i)
+                         x' = fromRows $ I.elems a
+                         -- next line is BAD if distribution not stationary
+                         x = concat $ toBlocksEvery i s x'
+                         w' = ica' g g' n t w x
+                         y = w' <> x'
+                     in (I.listArray (1,1) $ toRows y,w') 
 
 -----------------------------------------------------------------------------
 
@@ -197,6 +200,6 @@ icaDefaults :: Int                         -- ^ random seed
             -> (I.Array Int (Vector Double),Matrix Double) -- ^ transformed data, ica transform
 icaDefaults r a = let c = I.rangeSize $ I.bounds a
                       s = (dim $ (a I.! 1)) `div` 16
-                  in ica r sigmoid sigmoid' PNorm2 0.0000001 (c-1) s a
+                  in ica r sigmoid sigmoid' Infinity 0.0000001 s a
 
 -----------------------------------------------------------------------------

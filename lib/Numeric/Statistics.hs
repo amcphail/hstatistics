@@ -14,6 +14,7 @@
 -----------------------------------------------------------------------------
 
 module Numeric.Statistics (
+                           Sample,Samples,
                           covarianceMatrix
                           ) where
 
@@ -29,8 +30,13 @@ import Numeric.GSL.Statistics
 
 -----------------------------------------------------------------------------
 
+type Sample a = Vector a
+type Samples a = I.Array Int (Vector a)
+
+-----------------------------------------------------------------------------
+
 -- | the covariance matrix
-covarianceMatrix :: I.Array Int (Vector Double) -- ^ the dimensions of data (each vector being one dimension)
+covarianceMatrix :: Samples Double              -- ^ the dimensions of data (each vector being one dimension)
                  -> Matrix Double               -- ^ the symmetric covariance matrix
 covarianceMatrix d = let (s,f) = I.bounds d
                       in fromArray2D $ I.array ((s,s),(f,f)) $ concat $ map (\(x,y) -> let c = covariance (d I.! x) (d I.! y) in if x == y then [((x,y),c)] else [((x,y),c),((y,x),c)]) $ filter (\(x,y) -> x <= y) $ I.range ((s,s),(f,f))

@@ -36,7 +36,25 @@
 		added PCA
 		added ICA
 
-0.2.0.7
+0.2.0.7:
 		removed hard-coded sigmoid from ICA algorithm internals
 		was not using seed passed to ica
 		minor fixes to remove warnings
+
+0.2.0.8:
+
+		error in decorrelation fixed
+
+0.2.1.1:
+		added PDF.hs
+		modified Information to take in PDF addition
+		added Surrogate.hs
+
+0.2.2.1:
+		improved ICA decorrelation step
+
+0.2.2.2:
+		reflected changes in hmatrix exports
+
+0.2.2.3:
+		

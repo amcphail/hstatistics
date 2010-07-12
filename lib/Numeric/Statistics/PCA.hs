@@ -2,7 +2,7 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.PCA
--- Copyright   :  (c) Alexander Vivian Hugh McPhail 2010
+-- Copyright   :  (c) A. V. H. McPhail 2010
 -- License     :  GPL-style
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com
@@ -27,6 +27,7 @@ import Data.Packed.Matrix
 
 import Numeric.LinearAlgebra.Interface
 import Numeric.LinearAlgebra.Algorithms
+import Numeric.LinearAlgebra.Linear
 
 import Numeric.GSL.Statistics
 
