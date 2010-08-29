@@ -9,7 +9,7 @@
 -- Stability   :  provisional
 -- Portability :  portable
 --
--- Probability Density Function interface
+-- Probability Distribution Function interface
 --
 -----------------------------------------------------------------------------
 
@@ -34,7 +34,7 @@ import Foreign.Storable
 
 -----------------------------------------------------------------------------
 
--- ^ a probability density function
+-- ^ a probability distribution function
 data PDFFunction a = P_Func (a -> Double)     -- p(x)
 
 -----------------------------------------------------------------------------

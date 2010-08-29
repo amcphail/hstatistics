@@ -55,7 +55,7 @@ mutual_information :: (PDF a Double, PDF b (Double,Double))
                    -> a                                          -- ^ the second dimension distribution
                    -> (Vector Double, Vector Double)             -- ^ the sequence
                    -> Double         -- ^ the mutual information
-mutual_information p px py (x,y) = let ps = probability p $ zipVector (,) x y
+mutual_information p px py (x,y) = let ps = probability p $ zipVector x y
                                        xs = probability px x
                                        ys = probability py y
                                    in negate $ dot ps (logE ps - logE (xs*ys)) 
