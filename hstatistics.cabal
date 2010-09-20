@@ -53,5 +53,5 @@ library
 
     source-repository head
         type:     darcs
-        location: http://code.haskell.org/hstatistics
+        location: darcs get http://code.haskell.org/hstatistics
 

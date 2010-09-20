@@ -21,13 +21,11 @@ module Numeric.Statistics.Information (
 
 -----------------------------------------------------------------------------
 
-import Data.Packed.Vector
+import Numeric.Vector
 
 import Numeric.Statistics.PDF
 
 import Numeric.LinearAlgebra.Algorithms()
-import Numeric.LinearAlgebra.Interface()
-import Numeric.LinearAlgebra.Linear
 
 -----------------------------------------------------------------------------
 

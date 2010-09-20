@@ -22,12 +22,9 @@ module Numeric.Statistics.PCA (
 
 import qualified Data.Array.IArray as I 
 
-import Data.Packed.Vector
-import Data.Packed.Matrix
-
-import Numeric.LinearAlgebra.Interface
+import Numeric.Vector
+import Numeric.Matrix
 import Numeric.LinearAlgebra.Algorithms
-import Numeric.LinearAlgebra.Linear
 
 import Numeric.GSL.Statistics
 
