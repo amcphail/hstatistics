@@ -21,11 +21,9 @@ module Numeric.Statistics.Information (
 
 -----------------------------------------------------------------------------
 
-import Numeric.Vector
-
 import Numeric.Statistics.PDF
 
-import Numeric.LinearAlgebra.Algorithms()
+import Numeric.LinearAlgebra
 
 -----------------------------------------------------------------------------
 

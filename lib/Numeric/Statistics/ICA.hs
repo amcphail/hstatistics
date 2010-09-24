@@ -32,10 +32,7 @@ module Numeric.Statistics.ICA (
 
 import qualified Data.Array.IArray as I 
 
-import Numeric.Vector
-import Numeric.Matrix
-
-import Numeric.LinearAlgebra.Algorithms
+import Numeric.LinearAlgebra
 
 import Numeric.GSL.Statistics
 

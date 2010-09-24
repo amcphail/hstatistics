@@ -23,9 +23,10 @@ module Numeric.Statistics (
 
 -----------------------------------------------------------------------------
 
-import Numeric.Vector
-import Numeric.Matrix
+--import Numeric.Vector
+--import Numeric.Matrix
 --import Numeric.Container
+import Numeric.LinearAlgebra
 
 import qualified Data.Array.IArray as I 
 

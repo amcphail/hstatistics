@@ -61,3 +61,6 @@
 
 0.2.2.4:
 		added mean/variance for lists/vectors/matrices
+
+0.2.2.5:
+		reflected changes in hmatrix exports
