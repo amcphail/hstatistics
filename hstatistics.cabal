@@ -30,7 +30,8 @@ library
 
     Build-Depends:      base >= 3 && < 5,
                         array, random,
-                        hmatrix >= 0.10.0, hmatrix-gsl-stats >= 0.1.2.4
+                        hmatrix >= 0.10.0.0,
+                        hmatrix-gsl-stats >= 0.1.2.6
 
     Extensions:         
 
@@ -51,7 +52,7 @@ library
                               -fno-warn-orphans
                               -fno-warn-unused-binds
 
-    source-repository head
-        type:     darcs
-        location: darcs get http://code.haskell.org/hstatistics
+source-repository head
+    type:     darcs
+    location: http://code.haskell.org/hstatistics
 

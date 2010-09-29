@@ -63,4 +63,5 @@
 		added mean/variance for lists/vectors/matrices
 
 0.2.2.5:
-		reflected changes in hmatrix exports
+		hmatrix 0.10.0.0 release
+
