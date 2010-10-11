@@ -65,3 +65,8 @@
 0.2.2.5:
 		hmatrix 0.10.0.0 release
 
+0.2.2.6:
+		changed base to >= 4
+		fixed Setup.lhs (as there is no configure.hs) 
+ 		  pointed out by dons
+
