@@ -70,3 +70,11 @@
 		fixed Setup.lhs (as there is no configure.hs) 
  		  pointed out by dons
 
+0.2.2.8:
+		fixed definition of mutual information to be non-negative
+
+0.2.2.9:
+		divide mutual information/entropy by sample size
+
+0.2.2.10:
+		remove previous change

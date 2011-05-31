@@ -1,8 +1,8 @@
 Name:               hstatistics
-Version:            0.2.2.6
+Version:            0.2.2.10
 License:            BSD3
 License-file:       LICENSE
-Copyright:          (c) A.V.H. McPhail 2010
+Copyright:          (c) A.V.H. McPhail 2010, 2011
 Author:             Vivian McPhail
 Maintainer:         haskell.vivian.mcphail <at> gmail <dot> com
 Stability:          provisional
@@ -17,9 +17,9 @@ Description:
      .
      Feature requests, suggestions, and bug fixes welcome.
 Category:           Math, Statistics
-tested-with:        GHC ==6.12.1
+tested-with:        GHC ==7.0.1
 
-cabal-version:      >=1.6
+cabal-version:      >=1.8
 
 build-type:         Simple
 
@@ -31,7 +31,7 @@ library
     Build-Depends:      base >= 4 && < 5,
                         array, random,
                         hmatrix >= 0.10.0.0,
-                        hmatrix-gsl-stats >= 0.1.2.6
+                        hmatrix-gsl-stats >= 0.1.2.9
 
     Extensions:         
 

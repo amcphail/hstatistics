@@ -1,4 +1,5 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
+{-# LANGUAGE MultiParamTypeClasses,
+             FlexibleInstances #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.PDF

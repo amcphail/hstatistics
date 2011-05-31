@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.ICA
@@ -116,8 +115,8 @@ whiten d q = let cv = covarianceMatrix d
 
 -----------------------------------------------------------------------------
 
-unconcat 0     _ _  = []
-unconcat (r+1) c xs = [take c xs] ++ unconcat r c (drop c xs)
+unconcat 0 _ _  = []
+unconcat r c xs = [take c xs] ++ unconcat (r-1) c (drop c xs)
 
 random_vector :: Int -> (Int,Int) -> Matrix Double
 random_vector s (r,c) = fromLists $ unconcat r c $ randomRs (-1,1) (mkStdGen s)

@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.Surrogate
@@ -41,15 +40,15 @@ surrogate :: Int                          -- ^ random seed
 surrogate r n f d = I.listArray (1,n+1) $ (f d) : (surrogate' (mkStdGen r) n f d)
 
 surrogate' :: StdGen -> Int-> (I.Array Int (Vector Double) -> a) -> I.Array Int (Vector Double) -> [a]
-surrogate' _ 0     _ _ = []
-surrogate' g (n+1) f d = let (g',g'') = split g
-                             d' = permute_data g' d
-                         in (f d) : (surrogate' g'' n f d)
+surrogate' _ 0 _ _ = []
+surrogate' g n f d = let (g',g'') = split g
+                         d' = permute_data g' d
+                     in (f d) : (surrogate' g'' (n-1) f d)
 
 randomList :: StdGen -> Int -> [Int]
-randomList _ 0     = []
-randomList g (n+1) = let (r,g') = random g
-                     in r : (randomList g' n)
+randomList _ 0 = []
+randomList g n = let (r,g') = random g
+                 in r : (randomList g' (n-1))
 
 permute_data :: StdGen -> I.Array Int (Vector Double) -> I.Array Int (Vector Double)
 permute_data g d = let s = I.rangeSize $ I.bounds d

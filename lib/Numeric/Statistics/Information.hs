@@ -1,4 +1,4 @@
-{-# OPTIONS_GHC -fglasgow-exts #-}
+{-# LANGUAGE FlexibleContexts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.Information
@@ -42,7 +42,7 @@ entropy :: PDF a Double
         -> Vector Double           -- ^ the sequence
         -> Double                  -- ^ the entropy
 entropy p x = let ps = probability p x
-              in negate $ dot ps (logE ps)
+              in negate $ (dot ps (logE ps))
 
 -- | the mutual information \sum_x \sum_y p(x,y) \ln{\frac{p(x,y)}{p(x)p(y)}}
 mutual_information :: (PDF a Double, PDF b (Double,Double)) 
@@ -54,6 +54,6 @@ mutual_information :: (PDF a Double, PDF b (Double,Double))
 mutual_information p px py (x,y) = let ps = probability p $ zipVector x y
                                        xs = probability px x
                                        ys = probability py y
-                                   in negate $ dot ps (logE ps - logE (xs*ys)) 
+                                   in (dot ps (logE ps - logE (xs*ys)))
 
 -----------------------------------------------------------------------------
