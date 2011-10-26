@@ -43,7 +43,7 @@ surrogate' :: StdGen -> Int-> (I.Array Int (Vector Double) -> a) -> I.Array Int 
 surrogate' _ 0 _ _ = []
 surrogate' g n f d = let (g',g'') = split g
                          d' = permute_data g' d
-                     in (f d) : (surrogate' g'' (n-1) f d)
+                     in (f d) : (surrogate' g'' (n-1) f d')
 
 randomList :: StdGen -> Int -> [Int]
 randomList _ 0 = []
