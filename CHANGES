@@ -78,3 +78,6 @@
 
 0.2.2.10:
 		remove previous change
+
+0.2.2.11:
+		fixed bug in surrogate data sampling

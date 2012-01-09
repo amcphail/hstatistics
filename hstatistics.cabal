@@ -1,5 +1,5 @@
 Name:               hstatistics
-Version:            0.2.2.10
+Version:            0.2.2.11
 License:            BSD3
 License-file:       LICENSE
 Copyright:          (c) A.V.H. McPhail 2010, 2011
@@ -13,7 +13,7 @@ Description:
      .
      When hmatrix is installed with -fvector, the vector type is Data.Vector.Storable
      from the vector package and compatible with the 'statistics' package 
-     <http://hackage.haskell.org/package/statistics 
+     <http://hackage.haskell.org/package/statistics> 
      .
      Feature requests, suggestions, and bug fixes welcome.
 Category:           Math, Statistics
