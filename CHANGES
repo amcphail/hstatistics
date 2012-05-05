@@ -81,3 +81,6 @@
 
 0.2.2.11:
 		fixed bug in surrogate data sampling
+
+0.2.3:
+		added functions to Numeric.Statistics
