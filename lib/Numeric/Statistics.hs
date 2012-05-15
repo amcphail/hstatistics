@@ -2,8 +2,8 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics
--- Copyright   :  (c) Alexander Vivian Hugh McPhail 2010
--- License     :  GPL-style
+-- Copyright   :  (c) A. V. H. McPhail 2010, 2012
+-- License     :  BSD
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com
 -- Stability   :  provisional
@@ -19,8 +19,13 @@ module Numeric.Statistics (
                           , meanList, meanArray, meanMatrix
                           , varianceList, varianceArray, varianceMatrix
                           --
-                          , centre, cloglog, cut, ranks, kendall, logit
-                          , mahanalobis
+                          , centre, cloglog, corcoeff, cut
+                          , ranks, kendall, logit
+                          , mahalanobis
+                          , mode, moment
+                          , ols, percentile, range
+                          , run_count
+                          , spearman, studentize
                           ) where
 
 
@@ -29,11 +34,13 @@ module Numeric.Statistics (
 --import Numeric.Vector
 --import Numeric.Matrix
 --import Numeric.Container
-import Numeric.LinearAlgebra hiding (rank)
+import Numeric.LinearAlgebra
 
 import qualified Data.Array.IArray as I 
-
+import qualified Data.List as DL
 import qualified Data.Vector.Generic as GV
+
+import Foreign.Storable
 
 import Numeric.GSL.Statistics
 import Numeric.GSL.Sort(sort)
@@ -104,8 +111,15 @@ centre v = v - (realToFrac (mean v))
 -----------------------------------------------------------------------------
 
 -- | complementary log-log function
-cloglog :: Vector Double -> Vector Double
+--cloglog :: Vector Double -> Vector Double
+cloglog :: Floating a => a -> a
 cloglog v = - log (- (log v))
+
+-----------------------------------------------------------------------------
+
+-- | corcoeff = covariance x / (std dev x * std dev y)
+corcoeff :: Vector Double -> Vector Double -> Double
+corcoeff x y = (covariance x y)/((stddev x)*(stddev y))
 
 -----------------------------------------------------------------------------
 
@@ -125,7 +139,8 @@ cut v c  = let c' = sort c
 
 -- | return the rank of each element of the vector
 --     multiple identical entries result in the average rank of those entries
-ranks :: Vector Double -> Vector Double
+--ranks :: Vector Double -> Vector Double
+ranks :: (Fractional b, Storable b) => Vector Double -> Vector b
 ranks v = let v' = sort v
           in mapVector (\x -> 1 + rank_helper x v') v
               where rank_helper x v' = let is = GV.elemIndices x v'
@@ -146,13 +161,15 @@ kendall x y = let ln = dim x
 -----------------------------------------------------------------------------
 
 -- | (logit p) = log(p/(1-p))
-logit :: Vector Double -> Vector Double
+--logit :: Vector Double -> Vector Double
+logit :: (Floating b, Storable b)
+        => Vector b -> Vector b
 logit v =  mapVector (\x -> - (log ((1 / x) - 1))) v
 
 -----------------------------------------------------------------------------
 
 -- | the Mahalanobis D-square distance between samples
---     columns are components and rows are observations
+--     columns are components and rows are observations (uses pseudoinverse)
 mahalanobis :: Samples Double        -- ^ the data set
             -> Maybe (Sample Double) -- ^ (Just sample) to be measured or use mean when Nothing
             -> Double                -- ^ D^2 
@@ -168,8 +185,111 @@ mahalanobis x u = let (_,xr) = I.bounds x
                       --w'     = inv w
                   in ((xm <> s' <> (trans xm)) @@> (0,0)) 
 
-m_test_samples :: Samples Double
-m_test_samples = I.listArray (1,3) $ map fromList [[1,2,3,4],[2,3,4,5],[1,3,2,4]]
+-----------------------------------------------------------------------------
+
+-- | a list of element frequencies
+mode :: Vector Double -> [(Double,Integer)]
+mode v = let w = sort v
+         in DL.sortBy (\(_,n) (_,n') -> compare n' n) $ foldVector freqs [] w
+            where freqs x []          = [(x,1)]
+                  freqs x ((f,n):fns)
+                      | f == x         = ((f,n+1):fns) 
+                      | otherwise     = ((x,1):(f,n):fns)
+
+-----------------------------------------------------------------------------
+
+-- | the p'th moment of a vector
+moment :: Integral a 
+       => a             -- ^ moment
+       -> Bool          -- ^ calculate central moment
+       -> Bool          -- ^ calculate absolute moment
+       -> Vector Double -- ^ data
+       -> Double
+moment p c a v 
+    | p <= 0     = error "Numeric.Statistics.moment: negative moment requested"
+--    | p == 1     = mean v    
+--    | p == 2     = variance v -- gives sample variance
+    | otherwise = let u = if c then centre v else v
+                      w = if a then abs u else u
+                      x = mapVector (** (fromIntegral p)) w
+                  in mean x
+
+-----------------------------------------------------------------------------
+
+-- | ordinary least squares estimation for the multivariate model
+--   Y = X B + e        rows are observations, columns are elements
+--   mean e = 0, cov e = kronecker s I
+ols :: (Num (Vector t), Field t) 
+      => Matrix t         -- ^ X
+    -> Matrix t           -- ^ Y
+    -> (Matrix t, Matrix t, Matrix t) -- ^ (OLS estimator for B, OLS estimator for s, OLS residuals)
+ols x y 
+    | rows x /= rows y = error "Numeric.Statistics: ols: incorrect matrix dimensions"
+    | otherwise       = let (xr,xc) = (rows x,cols x)
+                            (yr,yc) = (rows y,cols y)
+                            z = (trans x) <> x
+                            r = rank z
+                            beta = if r == xc 
+                                      then (inv z) <> (trans x) <> y
+                                      else (pinv x) <> y
+                            rr = y - x <> beta
+                            sigma = ((trans rr) <> rr) / (fromIntegral $ xr - r)
+                        in (beta,rr,sigma)
+
+-----------------------------------------------------------------------------
+
+-- | compute quantiles in percent
+percentile :: Double        -- ^ percentile (0 - 100)
+           -> Vector Double -- ^ data
+           -> Double        -- ^ result
+percentile p d = quantile (0.01*p) d
+
+-----------------------------------------------------------------------------
+
+-- | the difference between the maximum and minimum of the input
+range :: Container c e => c e -> e
+range v = maxElement v - minElement v
+
+-----------------------------------------------------------------------------
+
+-- | count the number of runs greater than or equal to @n@ in the data
+run_count :: (Num a, Num t, Ord b, Ord a, Storable b) 
+            => a             -- ^ longest run to count
+          -> Vector b        -- ^ data
+          -> [(a, t)]        -- ^ [(run length,count)]
+run_count n v = let w = subVector 1 (dim v - 1) v
+                    x = foldVector run_count' [(1,v @> 0)] w
+                    y = map fst x
+                    z = takeWhile (<= n) $  DL.sort y
+                in foldr count [] z
+    where run_count' m ((c,g):cs)
+              | m < g             = ((c+1,m):cs)
+              | otherwise         = ((1,m):(c,g):cs)
+          count x []           = [(x,1)]
+          count x ((yv,yc):ys)   
+              | x == yv         = ((yv,yc+1):ys)
+              | otherwise      = ((x,1):(yv,yc):ys)
+
+-----------------------------------------------------------------------------
+
+-- | Spearman's rank correlation coefficient
+spearman :: Vector Double -> Vector Double -> Double
+spearman x y = corcoeff (ranks x) (ranks y)
+
+-----------------------------------------------------------------------------
+
+-- | centre and normalise a vector
+studentize :: Vector Double -> Vector Double
+studentize x = (centre x)/(fromList $ [stddev x])
+
+-----------------------------------------------------------------------------
+
+--table
+
+-----------------------------------------------------------------------------
+
+
+
 
 -----------------------------------------------------------------------------
 
