@@ -1,5 +1,5 @@
 Name:               hstatistics
-Version:            0.2.3
+Version:            0.2.4
 License:            BSD3
 License-file:       LICENSE
 Copyright:          (c) A.V.H. McPhail 2010, 2011, 2012
@@ -12,7 +12,7 @@ Description:
      Purely functional interface for statistics based on hmatrix and hmatrix-gsl-stats
      .
      When hmatrix is installed with -fvector, the vector type is Data.Vector.Storable
-     from the vector package and compatible with the 'statistics' package 
+     from the vector package and compatible with the 'statistics' package. 
      <http://hackage.haskell.org/package/statistics> 
      .
      Feature requests, suggestions, and bug fixes welcome.
@@ -54,6 +54,6 @@ library
                               -fno-warn-unused-binds
 
 source-repository head
-    type:     darcs
-    location: http://code.haskell.org/hstatistics
+    type:     git
+    location: git@github.com:amcphail/hstatistics.git
 
