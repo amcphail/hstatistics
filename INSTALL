@@ -1,8 +1,8 @@
 -----------------------------------------------
- A Graph Layout library for Haskell
+ A Statistics library for Haskell
 -----------------------------------------------
 
 INSTALLATION
 
-cabal install graph-layout
+cabal install hstatistics
 
