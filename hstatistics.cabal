@@ -1,5 +1,5 @@
 Name:               hstatistics
-Version:            0.2.4
+Version:            0.2.4.1
 License:            BSD3
 License-file:       LICENSE
 Copyright:          (c) A.V.H. McPhail 2010, 2011, 2012
@@ -55,5 +55,5 @@ library
 
 source-repository head
     type:     git
-    location: git@github.com:amcphail/hstatistics.git
+    location: https://github.com/amcphail/hstatistics.git
 
