@@ -94,3 +94,6 @@
 0.2.4.2:
 		Conrad Parker pointed out that hmatrix defaults to 
 		  Data.Vector.Storable
+
+0.2.5:
+		Added pcaN as requested by Marcel Ruegenberg

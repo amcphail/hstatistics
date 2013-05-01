@@ -13,13 +13,15 @@
 -----------------------------------------------------------------------------
 
 module Numeric.Statistics.PCA (
-                               pca, pcaTransform, pcaReduce
+                               pca, pcaN, pcaTransform, pcaReduce
                           ) where
 
 
 -----------------------------------------------------------------------------
 
 import qualified Data.Array.IArray as I 
+import Data.List(sortBy)
+import Data.Ord(comparing)
 
 import Numeric.LinearAlgebra
 
@@ -29,7 +31,8 @@ import Numeric.Statistics
 
 -----------------------------------------------------------------------------
 
--- | find the n principal components of multidimensional data
+-- | find the principal components of multidimensional data greater than
+--    the threshhold
 pca :: I.Array Int (Vector Double)    -- the data
     -> Double                         -- eigenvalue threshold
     -> Matrix Double
@@ -41,6 +44,20 @@ pca d q = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from 
               v' = zip val vec
               v = filter (\(x,_) -> x > q) v'  -- keep only eigens > than parameter
           in fromColumns $ snd $ unzip v
+
+-- | find N greatest principal components of multidimensional data
+--    according to size of the eigenvalue
+pcaN :: I.Array Int (Vector Double)    -- the data
+     -> Int                            -- number of components to return
+     -> Matrix Double
+pcaN d n = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from each dimension
+               cv = covarianceMatrix d'
+               (val',vec') = eigSH cv           -- the covariance matrix is real symmetric
+               val = toList val'
+               vec = toColumns vec'
+               v' = zip val vec
+               v = take n $ reverse $ sortBy (comparing fst) v'
+           in fromColumns $ snd $ unzip v
 
 -- | perform a PCA transform of the original data (remove mean)
 -- |     Final = M^T Data^T
