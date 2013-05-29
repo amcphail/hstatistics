@@ -1,8 +1,8 @@
 Name:               hstatistics
-Version:            0.2.5
+Version:            0.2.5.1
 License:            BSD3
 License-file:       LICENSE
-Copyright:          (c) A.V.H. McPhail 2010, 2011, 2012
+Copyright:          (c) A.V.H. McPhail 2010, 2011, 2012, 2013
 Author:             Vivian McPhail
 Maintainer:         haskell.vivian.mcphail <at> gmail <dot> com
 Stability:          provisional
@@ -16,7 +16,7 @@ Description:
      .
      Feature requests, suggestions, and bug fixes welcome.
 Category:           Math, Statistics
-tested-with:        GHC ==7.4.1
+tested-with:        GHC ==7.6.3
 
 cabal-version:      >=1.8
 

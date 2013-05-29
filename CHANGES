@@ -97,3 +97,6 @@
 
 0.2.5:
 		Added pcaN as requested by Marcel Ruegenberg
+
+0.2.5.1:
+		added pcaReduceN to PCA

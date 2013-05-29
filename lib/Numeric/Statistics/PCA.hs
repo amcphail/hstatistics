@@ -67,10 +67,11 @@ pcaTransform :: I.Array Int (Vector Double)    -- ^ the data
 pcaTransform d m = let d' = fmap (\x -> x - (scalar $ mean x)) d -- remove the mean from each dimension
                    in I.listArray (1,cols m) $ toRows $ (trans m) <> (fromRows $ I.elems d')
 
--- | perform a dimension-reducing PCA modification
+-- | perform a dimension-reducing PCA modification, 
+--     using an eigenvalue threshhold
 pcaReduce :: I.Array Int (Vector Double)      -- ^ the data
           -> Double                           -- ^ eigenvalue threshold
-          -> I.Array Int (Vector Double)      -- ^ the reduced data, with n principal components
+          -> I.Array Int (Vector Double)      -- ^ the reduced data
 pcaReduce d q = let u = fmap (scalar . mean) d
                     d' = zipWith (-) (I.elems d) (I.elems u)
                     cv = covarianceMatrix $ I.listArray (I.bounds d) d'
@@ -81,5 +82,20 @@ pcaReduce d q = let u = fmap (scalar . mean) d
                     v = filter (\(x,_) -> x > q) v'  -- keep only eigens > than parameter
                     m = fromColumns $ snd $ unzip v
                  in I.listArray (I.bounds d) $ zipWith (+) (toRows $ m <> (trans m) <> fromRows d') (I.elems u) 
+
+-- | perform a dimension-reducing PCA modification, using N components
+pcaReduceN :: I.Array Int (Vector Double)      -- ^ the data
+           -> Int                              -- ^ N, the number of components
+           -> I.Array Int (Vector Double)      -- ^ the reduced data, with n principal components
+pcaReduceN d n = let u = fmap (scalar . mean) d
+                     d' = zipWith (-) (I.elems d) (I.elems u)
+                     cv = covarianceMatrix $ I.listArray (I.bounds d) d'
+                     (val',vec') = eigSH cv           -- the covariance matrix is real symmetric
+                     val = toList val'
+                     vec = toColumns vec'
+                     v' = zip val vec
+                     v = take n $ reverse $ sortBy (comparing fst) v'
+                     m = fromColumns $ snd $ unzip v
+                  in I.listArray (I.bounds d) $ zipWith (+) (toRows $ m <> (trans m) <> fromRows d') (I.elems u) 
 
 -----------------------------------------------------------------------------
