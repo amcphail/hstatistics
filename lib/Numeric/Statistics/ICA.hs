@@ -176,11 +176,11 @@ ica :: Int                         -- ^ random seed
     -> Int                         -- ^ sampling size (must be smaller than length of data)
     -> I.Array Int (Vector Double) -- ^ data
     -> (I.Array Int (Vector Double),Matrix Double) -- ^ transformed data, ica transform
-ica r g g' n t s a = let i = I.rangeSize $ I.bounds a
-                         w = random_vector r (i,i)
+ica r g g' n t s a = let j = I.rangeSize $ I.bounds a
+                         w = random_vector r (j,j)
                          x' = fromRows $ I.elems a
                          -- next line is BAD if distribution not stationary
-                         x = concat $ toBlocksEvery i s x'
+                         x = concat $ toBlocksEvery j s x'
                          w' = ica' g g' n t w x
                          y = w' <> x'
                      in (I.listArray (1,1) $ toRows y,w') 

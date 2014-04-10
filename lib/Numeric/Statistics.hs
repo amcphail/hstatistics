@@ -130,10 +130,10 @@ cut :: Vector Double
 cut v c  = let c' = sort c
            in mapVector (\x -> cut_helper 0 x c') v 
     where
-      cut_helper i x c 
-          | i >= dim c                       = error "Numeric.Statistics: cut: data point not within interval"
-          | x >= (c @> i) && x <= (c @> (i+1)) = i
-          | otherwise                       = cut_helper (i + 1) x c
+      cut_helper j x d 
+          | j >= dim d                       = error "Numeric.Statistics: cut: data point not within interval"
+          | x >= (d @> j) && x <= (d @> (j+1)) = j
+          | otherwise                       = cut_helper (j + 1) x d
 
 -----------------------------------------------------------------------------
 
