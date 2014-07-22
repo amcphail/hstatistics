@@ -13,7 +13,7 @@
 -----------------------------------------------------------------------------
 
 module Numeric.Statistics.PCA (
-                               pca, pcaN, pcaTransform, pcaReduce
+                               pca, pcaN, pcaTransform, pcaReduce, pcaReduceN
                           ) where
 
 
