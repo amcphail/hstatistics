@@ -2,8 +2,8 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics
--- Copyright   :  (c) A. V. H. McPhail 2010, 2012
--- License     :  BSD
+-- Copyright   :  (c) A. V. H. McPhail 2010, 2012, 2014
+-- License     :  BSD3
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com
 -- Stability   :  provisional

@@ -1,8 +1,8 @@
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.Histogram
--- Copyright   :  (c) A. V. H. McPhail 2010
--- License     :  GPL-style
+-- Copyright   :  (c) A. V. H. McPhail 2010, 2014
+-- License     :  BSD3
 --
 -- Maintainer  :  haskell.vivian.mcphail <at> gmail <dot> com
 -- Stability   :  provisional
