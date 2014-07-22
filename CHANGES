@@ -100,3 +100,6 @@
 
 0.2.5.1:
 		added pcaReduceN to PCA
+
+0.2.5.2:
+		exposed pcaReduceN as requested by Tom Nielsen
