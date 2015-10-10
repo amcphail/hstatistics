@@ -31,14 +31,14 @@ module Numeric.Statistics (
 
 -----------------------------------------------------------------------------
 
---import Numeric.Vector
---import Numeric.Matrix
---import Numeric.Container
-import Numeric.LinearAlgebra
+import Numeric.LinearAlgebra hiding(range)
+--import Numeric.LinearAlgebra.Data hiding(range)
+--import Numeric.LinearAlgebra.Devel
 
 import qualified Data.Array.IArray as I 
 import qualified Data.List as DL
 import qualified Data.Vector.Generic as GV
+--import qualified Data.Vector.Storable as SV
 
 import Foreign.Storable
 
@@ -68,36 +68,36 @@ correlationCoefficientMatrix d = let (s,f) = I.bounds d
 -----------------------------------------------------------------------------
 
 -- | the mean of a list of vectors
-meanList :: (Container Vector a, Num (Vector a)) => [Sample a] -> Sample a
+meanList :: (Container Vector a, Num (Vector a), Fractional a) => [Sample a] -> Sample a
 meanList []     = error "meanVectors: empty list"
 meanList [s]    = s
 meanList (s:ss) = let ln = fromIntegral $ length ss + 1
                   in scale (recip ln) $ foldl (+) s ss
 
 -- | the mean of an array of vectors
-meanArray :: (Container Vector a, Num (Vector a)) => Samples a -> Sample a
+meanArray :: (Container Vector a, Num (Vector a), Fractional a) => Samples a -> Sample a
 meanArray a = meanList $ I.elems a
 
 -- | the mean of a matrix with data series in rows
-meanMatrix :: (Container Vector a, Num (Vector a), Element a) => Matrix a -> Sample a
+meanMatrix :: (Container Vector a, Num (Vector a), Element a, Fractional a) => Matrix a -> Sample a
 meanMatrix a = meanList $ toRows a
 
 -----------------------------------------------------------------------------
 
 -- | the variance of a list of vectors
-varianceList :: (Container Vector a, Floating (Vector a)) => [Sample a] -> Sample a
+varianceList :: (Container Vector a, Floating (Vector a), Num a, Fractional a) => [Sample a] -> Sample a
 varianceList []  = error "varianceList: empty list"
-varianceList [s] = constant 0 (dim s)
+varianceList [s] = konst 0 (size s)
 varianceList l   = let mxs = meanList (map (** 2) l)
                        msx = (meanList l) ** 2
                    in mxs - msx
 
 -- | the variance of an array of vectors
-varianceArray :: (Container Vector a, Floating (Vector a)) => Samples a -> Sample a
+varianceArray :: (Container Vector a, Floating (Vector a), Num a, Fractional a) => Samples a -> Sample a
 varianceArray a = varianceList $ I.elems a
 
 -- | the variance of a matrix with data series in rows
-varianceMatrix :: (Container Vector a, Floating (Vector a), Element a) => Matrix a -> Sample a
+varianceMatrix :: (Container Vector a, Floating (Vector a), Element a, Num a, Fractional a) => Matrix a -> Sample a
 varianceMatrix a = varianceList $ toRows a
 
 -----------------------------------------------------------------------------
@@ -128,11 +128,11 @@ cut :: Vector Double
     -> Vector Double -- ^ intervals
     -> Vector Int    -- ^ data indexed by bin
 cut v c  = let c' = sort c
-           in mapVector (\x -> cut_helper 0 x c') v 
+           in GV.map (\x -> cut_helper 0 x c') v 
     where
       cut_helper j x d 
-          | j >= dim d                       = error "Numeric.Statistics: cut: data point not within interval"
-          | x >= (d @> j) && x <= (d @> (j+1)) = j
+          | j >= size d                       = error "Numeric.Statistics: cut: data point not within interval"
+          | x >= (d `atIndex` j) && x <= (d `atIndex` (j+1)) = j
           | otherwise                       = cut_helper (j + 1) x d
 
 -----------------------------------------------------------------------------
@@ -142,19 +142,19 @@ cut v c  = let c' = sort c
 --ranks :: Vector Double -> Vector Double
 ranks :: (Fractional b, Storable b) => Vector Double -> Vector b
 ranks v = let v' = sort v
-          in mapVector (\x -> 1 + rank_helper x v') v
+          in GV.map (\x -> 1 + rank_helper x v') v
               where rank_helper x v' = let is = GV.elemIndices x v'
-                                       in (realToFrac (GV.foldl (+) 0 is)) / (fromIntegral $ dim is)
+                                       in (realToFrac (GV.foldl (+) 0 is)) / (fromIntegral $ GV.length is)
 
 -----------------------------------------------------------------------------
 
 -- | kendall's rank correlation τ
 kendall :: Vector Double -> Vector Double -> Matrix Double
-kendall x y = let ln = dim x
+kendall x y = let ln = size x
                   rx = ranks x
                   ry = ranks y
                   r = fromColumns [rx,ry]
-                  m = signum $ (kronecker r (asColumn $ constant 1.0 ln)) - (kronecker (asRow $ constant 1.0 ln) r)
+                  m = signum $ (kronecker r (asColumn $ konst 1.0 ln)) - (kronecker (asRow $ konst 1.0 ln) r)
                   c = rows m - 1
               in correlationCoefficientMatrix $ I.listArray (0,c) (toColumns m)
 
@@ -164,7 +164,7 @@ kendall x y = let ln = dim x
 --logit :: Vector Double -> Vector Double
 logit :: (Floating b, Storable b)
         => Vector b -> Vector b
-logit v =  mapVector (\x -> - (log ((1 / x) - 1))) v
+logit v =  GV.map (\x -> - (log ((1 / x) - 1))) v
 
 -----------------------------------------------------------------------------
 
@@ -181,16 +181,16 @@ mahalanobis x u = let (_,xr) = I.bounds x
                                  Just m  -> m
                       xm     = fromRows $ map ((-) xu) $ toRows $ fromColumns xl
                       --um     = asColumn xu
-                      --w      = ((trans xm) <> xm + (trans um) <> um)/(fromIntegral $ xr - 1)
+                      --w      = ((tr' xm) <> xm + (tr' um) <> um)/(fromIntegral $ xr - 1)
                       --w'     = inv w
-                  in ((xm <> s' <> (trans xm)) @@> (0,0)) 
+                  in ((xm <> s' <> (tr' xm)) `atIndex` (0,0)) 
 
 -----------------------------------------------------------------------------
 
 -- | a list of element frequencies
 mode :: Vector Double -> [(Double,Integer)]
 mode v = let w = sort v
-         in DL.sortBy (\(_,n) (_,n') -> compare n' n) $ foldVector freqs [] w
+         in DL.sortBy (\(_,n) (_,n') -> compare n' n) $ GV.foldr freqs [] w
             where freqs x []          = [(x,1)]
                   freqs x ((f,n):fns)
                       | f == x         = ((f,n+1):fns) 
@@ -211,7 +211,7 @@ moment p c a v
 --    | p == 2     = variance v -- gives sample variance
     | otherwise = let u = if c then centre v else v
                       w = if a then abs u else u
-                      x = mapVector (** (fromIntegral p)) w
+                      x = GV.map (** (fromIntegral p)) w
                   in mean x
 
 -----------------------------------------------------------------------------
@@ -227,13 +227,13 @@ ols x y
     | rows x /= rows y = error "Numeric.Statistics: ols: incorrect matrix dimensions"
     | otherwise       = let (xr,xc) = (rows x,cols x)
                             (yr,yc) = (rows y,cols y)
-                            z = (trans x) <> x
+                            z = (tr' x) <> x
                             r = rank z
                             beta = if r == xc 
-                                      then (inv z) <> (trans x) <> y
+                                      then (inv z) <> (tr' x) <> y
                                       else (pinv x) <> y
                             rr = y - x <> beta
-                            sigma = ((trans rr) <> rr) / (fromIntegral $ xr - r)
+                            sigma = ((tr' rr) <> rr) / (fromIntegral $ xr - r)
                         in (beta,rr,sigma)
 
 -----------------------------------------------------------------------------
@@ -247,18 +247,18 @@ percentile p d = quantile (0.01*p) d
 -----------------------------------------------------------------------------
 
 -- | the difference between the maximum and minimum of the input
-range :: Container c e => c e -> e
+range :: (Container c e, Num e) => c e -> e
 range v = maxElement v - minElement v
 
 -----------------------------------------------------------------------------
 
 -- | count the number of runs greater than or equal to @n@ in the data
-run_count :: (Num a, Num t, Ord b, Ord a, Storable b) 
+run_count :: (Num a, Num t, Ord b, Ord a, Storable b, Container Vector b) 
             => a             -- ^ longest run to count
           -> Vector b        -- ^ data
           -> [(a, t)]        -- ^ [(run length,count)]
-run_count n v = let w = subVector 1 (dim v - 1) v
-                    x = foldVector run_count' [(1,v @> 0)] w
+run_count n v = let w = subVector 1 (size v - 1) v
+                    x = GV.foldr run_count' [(1,v `atIndex` 0)] w
                     y = map fst x
                     z = takeWhile (<= n) $  DL.sort y
                 in foldr count [] z

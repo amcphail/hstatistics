@@ -25,7 +25,8 @@ module Numeric.Statistics.PDF (
 
 -----------------------------------------------------------------------------
 
-import qualified Data.Packed.Vector as V
+--import qualified Data.Packed.Vector as V
+import qualified Data.Vector.Storable as V
 
 import qualified Numeric.GSL.Histogram as H
 import qualified Numeric.GSL.Histogram2D as H2
@@ -46,7 +47,7 @@ class PDF b a where
     probability :: b -> V.Vector a -> V.Vector Double
 
 instance Storable b => PDF (PDFFunction b) b where
-    probability (P_Func f) = V.mapVector f
+    probability (P_Func f) = V.map f
 
 instance PDF H.Histogram Double where
     probability = H.prob

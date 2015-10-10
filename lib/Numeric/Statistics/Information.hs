@@ -23,7 +23,13 @@ module Numeric.Statistics.Information (
 
 import Numeric.Statistics.PDF
 
-import Numeric.LinearAlgebra
+import qualified Numeric.LinearAlgebra as LA
+--import Numeric.LinearAlgebra.Data hiding(Vector)
+
+--import qualified Data.Vector as DV
+import qualified Data.Vector.Storable as V
+
+import Prelude hiding(map,zip)
 
 -----------------------------------------------------------------------------
 
@@ -31,7 +37,7 @@ zeroToOne x
     | x == 0.0  = 1.0
     | otherwise = x
 
-logE = mapVector (log . zeroToOne)
+logE = V.map (log . zeroToOne)
 
 
 -----------------------------------------------------------------------------
@@ -39,21 +45,21 @@ logE = mapVector (log . zeroToOne)
 -- | the entropy \sum p_i l\ln{p_i} of a sequence
 entropy :: PDF a Double 
         => a                       -- ^ the underlying distribution
-        -> Vector Double           -- ^ the sequence
+        -> LA.Vector Double           -- ^ the sequence
         -> Double                  -- ^ the entropy
 entropy p x = let ps = probability p x
-              in negate $ (dot ps (logE ps))
+              in negate $ (LA.dot ps (logE ps))
 
 -- | the mutual information \sum_x \sum_y p(x,y) \ln{\frac{p(x,y)}{p(x)p(y)}}
 mutual_information :: (PDF a Double, PDF b (Double,Double)) 
                    => b                                          -- ^ the underlying distribution
                    -> a                                          -- ^ the first dimension distribution
                    -> a                                          -- ^ the second dimension distribution
-                   -> (Vector Double, Vector Double)             -- ^ the sequence
+                   -> (LA.Vector Double, LA.Vector Double)             -- ^ the sequence
                    -> Double         -- ^ the mutual information
-mutual_information p px py (x,y) = let ps = probability p $ zipVector x y
+mutual_information p px py (x,y) = let ps = probability p $ V.zipWith (,) x y
                                        xs = probability px x
                                        ys = probability py y
-                                   in (dot ps (logE ps - logE (xs*ys)))
+                                   in (LA.dot ps (logE ps - logE (xs*ys)))
 
 -----------------------------------------------------------------------------

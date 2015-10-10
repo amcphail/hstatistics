@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 -----------------------------------------------------------------------------
 -- |
 -- Module      :  Numeric.Statistics.ICA
@@ -23,7 +24,9 @@
 module Numeric.Statistics.ICA (
                                sigmoid, sigmoid',
                                demean, whiten,
-                               ica, icaDefaults
+                               ica, icaDefaults,
+                               --
+                               NormType(..)
                           ) where
 
 
@@ -33,11 +36,23 @@ import qualified Data.Array.IArray as I
 
 import Numeric.LinearAlgebra
 
+import qualified Data.Vector.Generic as GV
+
 import Numeric.GSL.Statistics
 
 import Numeric.Statistics
 
 import System.Random
+
+-----------------------------------------------------------------------------
+
+data NormType = NormZero | NormOne | NormTwo | NormInf
+
+pnorm :: Normed (Vector a) => NormType -> Vector a -> R
+pnorm NormZero = norm_0
+pnorm NormOne  = norm_1
+pnorm NormTwo  = norm_2
+pnorm NormInf  = norm_Inf
 
 -----------------------------------------------------------------------------
 
@@ -76,7 +91,7 @@ whiten :: I.Array Int (Vector Double)                 -- ^ the data
        -> Double                                      -- ^ eigenvalue threshold
        -> (I.Array Int (Vector Double),Matrix Double) -- ^ (whitened data,transform)
 whiten d q = let cv = covarianceMatrix d
-                 (val',vec') = eigSH cv           -- the covariance matrix is real symmetric
+                 (val',vec') = eigSH $ trustSym cv  -- the covariance matrix is real symmetric
                  val = toList val'
                  vec = toColumns vec'
                  v' = zip val vec
@@ -85,7 +100,7 @@ whiten d q = let cv = covarianceMatrix d
                  dd = diag $ (** (-0.5)) $ fromList dd'  -- square root of eigenvalues diagonalised
                  e = fromColumns e'
                  x = fromRows $ I.elems d
-                 t = e <> dd <> trans e          -- the actual mathematics
+                 t = e <> dd <> tr' e          -- the actual mathematics
                  x' = t <> x                     -- the actual mathematics
                  d' = I.listArray (I.bounds d) (toRows x') 
              in (d',t)
@@ -125,23 +140,23 @@ random_vector s (r,c) = fromLists $ unconcat r c $ randomRs (-1,1) (mkStdGen s)
 update :: (Double -> Double) -> (Double -> Double) -> Matrix Double -> Matrix Double -> Matrix Double
 update g g' w x = let y = w <> x
                       ys = toRows y
-                      bis = map (\y' -> - mean (y' * (mapVector g y'))) ys
-                      ais = zipWith (\b y' -> -1 / (b - mean (mapVector g y'))) bis ys
+                      bis = map (\y' -> - mean (y' * (GV.map g y'))) ys
+                      ais = zipWith (\b y' -> -1 / (b - mean (GV.map g y'))) bis ys
                       r = rows y
                       ix = ((1,1),(r,r))
-                      cov = fromArray2D $ I.listArray ix $ map (\(m,n) -> covariance (mapVector g' (ys!!(m-1))) (ys!!(n-1))) $ I.range ix
+                      cov = fromArray2D $ I.listArray ix $ map (\(m,n) -> covariance (GV.map g' (ys!!(m-1))) (ys!!(n-1))) $ I.range ix
                   in w + (diag $ fromList ais) <> ((diag $ fromList bis) + cov) <> w  
 
 decorrelate :: Matrix Double -> Matrix Double
 decorrelate m = let (d',v') = eig m
                     d = fst $ fromComplex d'
                     v = fst $ fromComplex v'
-                in v <> (diag (d ** (-0.5))) <> trans v <> m
-{-decorrelate n t w = let w' = w / (scalar $ sqrt $ pnorm n (w <> trans w))
+                in v <> (diag (d ** (-0.5))) <> tr' v <> m
+{-decorrelate n t w = let w' = w / (scalar $ sqrt $ pnorm n (w <> tr' w))
                     in decorrelate' t w w'
     where decorrelate' t' m m' 
               | converged t' m m' = m'
-              | otherwise         = decorrelate' t' m' ((scale 1.5 m') - (scale 0.5 (m' <> trans m' <> m')))
+              | otherwise         = decorrelate' t' m' ((scale 1.5 m') - (scale 0.5 (m' <> tr' m' <> m')))
 -}
 
 normalise :: NormType -> Matrix Double -> Matrix Double
@@ -192,7 +207,7 @@ icaDefaults :: Int                         -- ^ random seed
             -> I.Array Int (Vector Double) -- ^ data
             -> (I.Array Int (Vector Double),Matrix Double) -- ^ transformed data, ica transform
 icaDefaults r a = let c = I.rangeSize $ I.bounds a
-                      s = (dim $ (a I.! 1)) `div` 16
-                  in ica r sigmoid sigmoid' Infinity 0.0000001 s a
+                      s = (GV.length $ (a I.! 1)) `div` 16
+                  in ica r sigmoid sigmoid' NormInf 0.0000001 s a
 
 -----------------------------------------------------------------------------

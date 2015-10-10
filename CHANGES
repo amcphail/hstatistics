@@ -103,3 +103,6 @@
 
 0.2.5.2:
 		exposed pcaReduceN as requested by Tom Nielsen
+
+0.2.5.3:
+		updated for hmatrix 0.17
