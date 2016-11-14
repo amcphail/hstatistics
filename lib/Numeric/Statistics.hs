@@ -79,7 +79,7 @@ meanArray :: (Container Vector a, Num (Vector a), Fractional a) => Samples a -> 
 meanArray a = meanList $ I.elems a
 
 -- | the mean of a matrix with data series in rows
-meanMatrix :: (Container Vector a, Num (Vector a), Element a, Fractional a) => Matrix a -> Sample a
+meanMatrix :: (Container Vector a, Num (Vector a), Fractional a) => Matrix a -> Sample a
 meanMatrix a = meanList $ toRows a
 
 -----------------------------------------------------------------------------
@@ -93,11 +93,11 @@ varianceList l   = let mxs = meanList (map (** 2) l)
                    in mxs - msx
 
 -- | the variance of an array of vectors
-varianceArray :: (Container Vector a, Floating (Vector a), Num a, Fractional a) => Samples a -> Sample a
+varianceArray :: (Container Vector a, Floating (Vector a), Fractional a) => Samples a -> Sample a
 varianceArray a = varianceList $ I.elems a
 
 -- | the variance of a matrix with data series in rows
-varianceMatrix :: (Container Vector a, Floating (Vector a), Element a, Num a, Fractional a) => Matrix a -> Sample a
+varianceMatrix :: (Container Vector a, Floating (Vector a), Fractional a) => Matrix a -> Sample a
 varianceMatrix a = varianceList $ toRows a
 
 -----------------------------------------------------------------------------
@@ -253,7 +253,7 @@ range v = maxElement v - minElement v
 -----------------------------------------------------------------------------
 
 -- | count the number of runs greater than or equal to @n@ in the data
-run_count :: (Num a, Num t, Ord b, Ord a, Storable b, Container Vector b) 
+run_count :: (Num a, Num t, Ord b, Ord a, Container Vector b) 
             => a             -- ^ longest run to count
           -> Vector b        -- ^ data
           -> [(a, t)]        -- ^ [(run length,count)]
