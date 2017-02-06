@@ -109,3 +109,7 @@
 
 0.2.5.4:
 		updated for hmatrix 0.18
+
+0.3:
+		changed PCA to use SVD as suggested by Pavol Klacansky 
+		(issue #3)
