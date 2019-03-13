@@ -34,6 +34,8 @@ module Numeric.Statistics.ICA (
 
 import qualified Data.Array.IArray as I 
 
+import Prelude hiding ((<>))
+
 import Numeric.LinearAlgebra
 
 import qualified Data.Vector.Generic as GV

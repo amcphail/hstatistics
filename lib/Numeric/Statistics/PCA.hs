@@ -20,11 +20,11 @@ module Numeric.Statistics.PCA (
 -----------------------------------------------------------------------------
 
 import qualified Data.Array.IArray as I 
+
+import Prelude hiding ((<>))
 import Data.List(sortBy)
 import Data.Ord(comparing)
-
 import Numeric.LinearAlgebra
-
 import Numeric.GSL.Statistics
 
 --import Numeric.Statistics
