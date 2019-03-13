@@ -263,6 +263,7 @@ run_count n v = let w = subVector 1 (size v - 1) v
     where run_count' m ((c,g):cs)
               | m < g             = ((c+1,m):cs)
               | otherwise         = ((1,m):(c,g):cs)
+          run_count' _ [] = error "Lib.Numeric.Statistics.run_count.run_count'"
           count x []           = [(x,1)]
           count x ((yv,yc):ys)   
               | x == yv         = ((yv,yc+1):ys)
