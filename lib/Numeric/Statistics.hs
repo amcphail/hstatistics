@@ -34,14 +34,12 @@ module Numeric.Statistics (
 import Numeric.LinearAlgebra hiding(range)
 --import Numeric.LinearAlgebra.Data hiding(range)
 --import Numeric.LinearAlgebra.Devel
-
-import qualified Data.Array.IArray as I 
+import Prelude hiding ((<>))
+import qualified Data.Array.IArray as I
 import qualified Data.List as DL
 import qualified Data.Vector.Generic as GV
 --import qualified Data.Vector.Storable as SV
-
 import Foreign.Storable
-
 import Numeric.GSL.Statistics
 import Numeric.GSL.Sort(sort)
 
@@ -265,6 +263,7 @@ run_count n v = let w = subVector 1 (size v - 1) v
     where run_count' m ((c,g):cs)
               | m < g             = ((c+1,m):cs)
               | otherwise         = ((1,m):(c,g):cs)
+          run_count' _ [] = error "Lib.Numeric.Statistics.run_count.run_count'"
           count x []           = [(x,1)]
           count x ((yv,yc):ys)   
               | x == yv         = ((yv,yc+1):ys)
