@@ -1,8 +1,8 @@
 Name:               hstatistics
-Version:            0.3
+Version:            0.3.1
 License:            BSD3
 License-file:       LICENSE
-Copyright:          (c) A.V.H. McPhail 2010--2014, 2016, 2017
+Copyright:          (c) A.V.H. McPhail 2010--2014, 2016, 2017, 2020
 Author:             Vivian McPhail
 Maintainer:         haskell.vivian.mcphail <at> gmail <dot> com
 Stability:          provisional
@@ -18,7 +18,7 @@ Description:
 Category:           Math, Statistics
 tested-with:        GHC ==8.0.1
 
-cabal-version:      >=1.8
+cabal-version:      >=1.10
 
 build-type:         Simple
 
@@ -27,7 +27,11 @@ extra-tmp-files:    hstatistics.buildinfo
 
 library
 
-    Build-Depends:      base >= 4 && < 5,
+    default-language:   Haskell2010
+
+        
+    Build-Depends:
+                        base >= 4 && < 5,
                         array, random,
                         vector,
                         hmatrix >= 0.18,

@@ -113,3 +113,6 @@
 0.3:
 		changed PCA to use SVD as suggested by Pavol Klacansky 
 		(issue #3)
+
+0.3.1:
+		minor version tweaks and fix issue #5
